@@ -1,27 +1,39 @@
+const width = 300;
+const height = 300;
+const radius = Math.min(width, height) / 2;
+
+const svg = d3.select("#time-circle")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
 function addTask() {
     const taskInput = document.getElementById('task-input');
     const taskText = taskInput.value.trim();
 
     if (taskText !== '') {
-        const timeCircle = document.getElementById('time-circle');
-        const segments = document.querySelectorAll('.segment');
-
-        const taskSegment = document.createElement('div');
-        taskSegment.className = 'segment';
-        taskSegment.style.background = getRandomColor();
-
         const startTime = prompt('시작 시간을 입력하세요 (0부터 23까지)');
         const endTime = prompt('종료 시간을 입력하세요 (0부터 23까지)');
 
         if (startTime >= 0 && endTime <= 23 && startTime < endTime) {
-            const startDegree = (startTime / 24) * 360;
-            const endDegree = (endTime / 24) * 360;
+            const startAngle = (startTime / 24) * 2 * Math.PI;
+            const endAngle = (endTime / 24) * 2 * Math.PI;
 
-            taskSegment.style.transform = `rotate(${startDegree}deg)`;
-            taskSegment.style.width = `${endDegree - startDegree}deg`;
+            const arc = d3.arc()
+                .innerRadius(0)
+                .outerRadius(radius)
+                .startAngle(startAngle)
+                .endAngle(endAngle);
 
-            taskSegment.innerText = taskText;
-            timeCircle.appendChild(taskSegment);
+            svg.append("path")
+                .attr("d", arc)
+                .attr("fill", colorScale(Math.random()))
+                .append("title")
+                .text(taskText);
         } else {
             alert('올바른 시간을 입력하세요.');
         }
@@ -30,13 +42,4 @@ function addTask() {
     } else {
         alert('할 일을 입력하세요.');
     }
-}
-
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
 }
